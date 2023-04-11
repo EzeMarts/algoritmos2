@@ -1,3 +1,5 @@
+# https://docs.google.com/document/d/16boitAloCwJJm6kn3cQIBsmgspC9eiQCJ4Q7ATpqOSg/edit
+# https://docs.python.org/3/tutorial/datastructures.html
 class Trie:
   root = None
 
@@ -7,7 +9,6 @@ class TrieNode:
   key = None
   isEndOfWord = False
 
-# https://docs.python.org/3/tutorial/datastructures.html
 def insert(T, element):
   if element == "":
     return None
@@ -76,34 +77,45 @@ def searchR(L, element):
       return False
     else:
       return searchR(L[i].children, element)
-
-def delete(T, element):
-  element = element.upper()
-  wordExist = search(T, element)
-  if wordExist:
-    print("entre a existe")########################
-    return deleteR(T.root.children, element)
+    
+def delete(T, element): # Optimizar
+  if T.root == None or element == "":
+    return None
   else:
-    print("entre a NO existe")##############
-    return False
-def deleteR(L, element):
-  i = 0
-  while L[i].key != element[0]:
-    i =+ 1
-  element = element[1: len(element)] # Cortar la cadena
-  if element == "":
-    if len(L[i].children) == 0:
-      upNode = L[i].parent
-      letter = L[i].key
-      while upNode.isEndOfWord != True and len(upNode.children) == 1:
-        upNode = upNode.parent
-        letter = upNode.key
-      print(letter)
-      print(upNode.key)
-      print(upNode.parent.children[0].key)
-      upNode.parent.children.remove(letter)
+    element = element.upper()
+    if searchR(T.root.children, element):
+      deleteR(T.root.children, element)
       return True
     else:
-      L[i].isEndOfWord = False
+      return False
+def deleteR(L, element): # Optimizar
+  i = 0
+  while i < len(L) and L[i].key != element[0]:
+    i =+ 1
+  if i == len(L):
+    return False
+  else:
+    element = element[1: len(element)] # Cortar la cadena
+    if element == "" and L[i].isEndOfWord:
+      if len(L[i].children) > 0:
+        L[i].isEndOfWord = False
+        return True
+      return deleteUnlink(L[i].parent, L[i])
+    elif element == "" and L[i].isEndOfWord == False:
+      return False
+    else:
+      return deleteR(L[i].children, element)
+
+def deleteUnlink(node, lowNode):
+  if node.isEndOfWord:
+    if len(node.children) > 1:
+      node.children.remove(lowNode)
       return True
-  return deleteR(L[i].children, element)
+    else:
+      node.children = None
+      return True
+  elif len(node.children) > 1:
+    node.children.remove(lowNode)
+    return True
+  else:
+    return deleteUnlink(node.parent, node)
